@@ -4,6 +4,11 @@ import Foundation
 struct AsyncApp {
     
     static func main() async {
+        await fetchIPGeoCountryAPIs()
+        await fetchRevengeOfTheSithCharactersAPI()
+    }
+    
+    static func fetchIPGeoCountryAPIs() async {
         do {
             // Get Current IP Address
             let ipifyResponse: IpifyResponse = try await fetchAPI(url: IpifyResponse.url)
@@ -21,4 +26,18 @@ struct AsyncApp {
         }
     }
     
+    static func fetchRevengeOfTheSithCharactersAPI() async {
+        do {
+            // Fetch revenge of the sith movie data containing array of characters ulrs
+            let revengeOfSith: SWAPIResponse<Film> = try await fetchAPI(url: Film.url(id: "6"))
+            print("Resp: \(revengeOfSith.response)")
+            
+            // Get first 3 characters and fetch them using TaskGroup in parallel
+            let urlsToFetch = Array(revengeOfSith.response.characterURLs.prefix(upTo: 3))
+            let revengeOfSithCharacters: [SWAPIResponse<People>] = try await fetchAPIGroup(urls: urlsToFetch)
+            print("Resp: \(revengeOfSithCharacters)")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
 }
